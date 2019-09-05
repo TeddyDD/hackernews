@@ -12,7 +12,7 @@ $ hn -h
     hn -- Hacker News without leaving your terminal.
 
   SYNOPSIS:
-    hn [-c] [-h] [-l LIMIT]
+    hn [-c] [-r] [-h] [-l LIMIT]
 
   OPTIONS:
     -c    Colorize the output.
