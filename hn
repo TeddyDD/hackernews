@@ -45,17 +45,14 @@ hackernews()
     limit=$((3 * limit))
   fi
 
-  sed_attributes="-Ee"
-
   attributes="title|link"
   curl -s "https://news.ycombinator.com/rss" |
     grep -Eio "<item>.*</item>" |
     grep -Eio "<($attributes)>[^<>]*</($attributes)>" |
-    sed $sed_attributes "s/<title>([^<>]*)<\/title>/$highlight_title\1/" \
-        -e "s/<link>([^<>]*)<\/link>/$highlight_link\1★/" \
-        -e "s/&#x2F;/\//g" \
-        -e "s/&#x27;/'/g" |
-    tr "★" "\n" |
+    awk -F '[<>]' -v t="$highlight_title" -v l="$highlight_link" '
+        /title/ { printf "%s%s\n", t, $3 }
+        /link/ { printf "%s%s\n\n", l, $3 }
+    ' |
     head -n $limit
   printf "\033[0m"
 }
