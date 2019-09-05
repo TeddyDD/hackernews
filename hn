@@ -12,6 +12,7 @@ help()
 
   OPTIONS:
     -c    Colorize the output.
+    -r    Show lobste.rs instead of Hacker News
     -l    Limit to LIMIT articles.
     -h    prints a summary of the help options.
 
@@ -46,15 +47,18 @@ hackernews()
   fi
 
   attributes="title|link"
-  curl -s "https://news.ycombinator.com/rss" |
-    grep -Eio "<item>.*</item>" |
+  curl -s "${url:-https://news.ycombinator.com/rss}"  |
+    tr -d '\n'                                        |
+    grep -Eio "<item>.*</item>"                       |
     grep -Eio "<($attributes)>[^<>]*</($attributes)>" |
     awk -F '[<>]' -v t="$highlight_title" -v l="$highlight_link" '
         /title/ { printf "%s%s\n", t, $3 }
         /link/ { printf "%s%s\n\n", l, $3 }
     ' |
-    sed -E -e "s/&#x2F;/\//g" \
-           -e "s/&#x27;/'/g"  |
+    sed -E -e "s/&#x2F;/\//g"  \
+           -e "s/&#x27;/'/g"   \
+           -e "s/&#39;/'/g"    \
+           -e "s/&#8217;/'/g"  |
     head -n $limit
   printf "\033[0m"
 }
@@ -74,17 +78,25 @@ set_color()
   fi
 }
 
-while getopts "chl:" OPTION
+set_lobsters()
+{
+    url="https://lobste.rs/rss"
+}
+
+while getopts "crhl:" OPTION
 do
   case "$OPTION" in
-    h)
+    (h)
       help
       exit 1;
       ;;
-    c)
+    (c)
       set_color
       ;;
-    l)
+    (r)
+      set_lobsters
+      ;;
+    (l)
       limit=$OPTARG
       if ! [ "$limit" -ge 1 ] || ! [ "$limit" -le 30 ]
       then
@@ -92,7 +104,7 @@ do
         exit 1;
       fi
       ;;
-    ?)
+    (?)
       help
       exit 1;
       ;;
