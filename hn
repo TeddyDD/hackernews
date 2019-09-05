@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 help()
 {
@@ -42,16 +42,10 @@ hackernews()
   then
     limit=90
   else
-    limit=$((3 * $limit))
+    limit=$((3 * limit))
   fi
 
-  # GNU sed uses -r for expanded regular expressions but OS X does not use GNU
-  # sed. Instead it relies on -E argument.
-  sed_attributes="-re"
-  if [ "`uname`" = "Darwin" ]
-  then
-    sed_attributes="-Ee"
-  fi
+  sed_attributes="-Ee"
 
   attributes="title|link"
   curl -s "https://news.ycombinator.com/rss" |
@@ -68,13 +62,13 @@ hackernews()
 
 set_color()
 {
-  highlight_title=`echo "\033[0;1;38;5;202m"`
+  highlight_title=$(echo "\033[0;1;38;5;202m")
   if [ "$highlight_title" = "\033[0;1;38;5;202m" ]
   then
     highlight_title=""
   fi
 
-  highlight_link=`echo "\033[0;38;5;68m"`
+  highlight_link=$(echo "\033[0;38;5;68m")
   if [ "$highlight_link" = "\033[0;38;5;68m" ]
   then
     highlight_link=""
@@ -93,7 +87,7 @@ do
       ;;
     l)
       limit=$OPTARG
-      if ! [ $limit -ge 1 ] || ! [ $limit -le 30 ]
+      if ! [ "$limit" -ge 1 ] || ! [ "$limit" -le 30 ]
       then
         echo "hackernews: valid range is [1-30] for -- l"
         exit 1;
