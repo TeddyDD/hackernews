@@ -1,8 +1,7 @@
 #!/bin/sh
 
-help()
-{
-  cat <<EOF
+help() {
+	cat <<EOF
 
   NAME:
     hn -- Hacker News without leaving your terminal.
@@ -35,82 +34,79 @@ help()
 EOF
 }
 
-hackernews()
-{
-  # Set the default limit to 90 (3 lines * 30 articles) lines or use 3 times
-  # the given value.
-  if [ "$limit" = "" ]
-  then
-    limit=90
-  else
-    limit=$((3 * limit))
-  fi
+hackernews() {
+	# Set the default limit to 90 (3 lines * 30 articles) lines or use 3 times
+	# the given value.
+	if [ "$limit" = "" ]
+	then
+		limit=90
+	else
+		limit=$((3 * limit))
+	fi
 
-  attributes="title|link"
-  curl -s "${url:-https://news.ycombinator.com/rss}"  |
-    tr -d '\n'                                        |
-    grep -Eio "<item>.*</item>"                       |
-    grep -Eio "<($attributes)>[^<>]*</($attributes)>" |
-    awk -F '[<>]' -v t="$highlight_title" -v l="$highlight_link" '
+	attributes="title|link"
+	curl -s "${url:-https://news.ycombinator.com/rss}" |
+		tr -d '\n' |
+		grep -Eio "<item>.*</item>" |
+		grep -Eio "<($attributes)>[^<>]*</($attributes)>" |
+		awk -F '[<>]' -v t="$highlight_title" -v l="$highlight_link" '
         /title/ { printf "%s%s\n", t, $3 }
         /link/ { printf "%s%s\n\n", l, $3 }
     ' |
-    sed -E -e "s/&#x2F;/\//g"  \
-           -e "s/&#x27;/'/g"   \
-           -e "s/&#39;/'/g"    \
-           -e "s/&#8212;/—/g"  \
-           -e "s/&#8217;/'/g"  \
-           -e "s/&#[0-9]+;//g"    |
-    head -n $limit
-  printf "\033[0m"
+		sed -E -e "s/&#x2F;/\//g" \
+			-e "s/&#x27;/'/g" \
+			-e "s/&#39;/'/g" \
+			-e "s/&#8212;/—/g" \
+			-e "s/&#8217;/'/g" \
+			-e "s/&#[0-9]+;//g" |
+		head -n $limit
+	printf "\033[0m"
 }
 
-set_color()
-{
-  highlight_title=$(echo "\033[0;1;38;5;202m")
-  if [ "$highlight_title" = "\033[0;1;38;5;202m" ]
-  then
-    highlight_title=""
-  fi
+set_color() {
+	highlight_title=$(echo "\033[0;1;38;5;202m")
+	if [ "$highlight_title" = "\033[0;1;38;5;202m" ]
+	then
+		highlight_title=""
+	fi
 
-  highlight_link=$(echo "\033[0;38;5;68m")
-  if [ "$highlight_link" = "\033[0;38;5;68m" ]
-  then
-    highlight_link=""
-  fi
+	highlight_link=$(echo "\033[0;38;5;68m")
+	if [ "$highlight_link" = "\033[0;38;5;68m" ]
+	then
+		highlight_link=""
+	fi
 }
 
-set_lobsters()
-{
-    url="https://lobste.rs/rss"
+set_lobsters() {
+	url="https://lobste.rs/rss"
 }
 
 while getopts "crhl:" OPTION
 do
-  case "$OPTION" in
-    (h)
-      help
-      exit 1;
-      ;;
-    (c)
-      set_color
-      ;;
-    (r)
-      set_lobsters
-      ;;
-    (l)
-      limit=$OPTARG
-      if ! [ "$limit" -ge 1 ] || ! [ "$limit" -le 30 ]
-      then
-        echo "hackernews: valid range is [1-30] for -- l"
-        exit 1;
-      fi
-      ;;
-    (?)
-      help
-      exit 1;
-      ;;
-  esac
+	case "$OPTION" in
+	h)
+		help
+		exit 1
+		;;
+	c)
+		set_color
+		;;
+	r)
+		set_lobsters
+		;;
+	l)
+		limit=$OPTARG
+		if ! [ "$limit" -ge 1 ] || ! [ "$limit" -le 30 ]
+		then
+			echo "hackernews: valid range is [1-30] for -- l"
+			exit 1
+		fi
+		;;
+	?)
+		help
+		exit 1
+		;;
+	esac
 done
 
 hackernews
